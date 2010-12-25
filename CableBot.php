@@ -144,14 +144,15 @@ class CableBot {
 		
 		// Add each tag to the categories
 		if ( is_array($cable->tags) ) {
-			foreach ( $cable->tags as $tag ) {
-				$categories[] = $tag;
-			}
+			$categories = array_merge(
+				$categories,
+				$this->categorizeTags($cable->tags)
+			);
 		}
 		
 		// Make some modifications
 		$cable->header = str_replace( '\n', "\n", $cable->header );
-		$cable->body = str_replace( '\n', "\n", $cable->body );
+		$cable->body = str_replace( array('\n',"¶"), "\n", $cable->body );
 		
 		// Make the wikicode
 		$wikiCode = <<<EOF
@@ -177,6 +178,7 @@ class CableBot {
 EOF;
 		
 		// Add the categories to the code
+		$categories = array_unique($categories);
 		foreach ( $categories as $cat ) {
 			$wikiCode .= "[[Category:$cat]]\n";
 		}
@@ -205,14 +207,15 @@ EOF;
 		}
 
                 // Setup the edit params
+		$edit['action'] = 'edit';
 		$edit['title'] = $id;
 		$edit['text'] = $wikiCode;
-		$edit['md5'] = md5($text);
+		$edit['md5'] = md5($wikiCode);
 		$edit['bot'] = "true";
 		$edit['section'] = 0;
 		$edit['createonly'] = "true";
 		$edit['token'] = urlencode( $apiJson->query->pages->$pageId->edittoken );
-		$edit['starttimestamp'] = time();
+		$edit['starttimestamp'] = $apiJson->query->pages->$pageId->starttimestamp;
 		$edit['format'] = 'json';
 		Logger::log("wiki edit params: ".print_r($edit, true));
 		$c = $this->c;
@@ -234,7 +237,7 @@ EOF;
          * Oversees the scraping and saving processes and
          * gives a public interface for calling.
          */
-	public function process() {
+	public function addNewCables() {
                 Logger::log("Starting process");
 		$this->login();
 
@@ -258,6 +261,11 @@ EOF;
 		
 	}
 
+	public function addOneCable( $id ) {
+	    $this->setId( $id );
+	    $this->addNewCables();
+	}
+
 	/**
 	 * Checks for which countries are mentioned in the body
 	 * @param string $body cable body
@@ -265,7 +273,7 @@ EOF;
 	 */
         private function findCountries( $body ) {
             $categories = array();
-
+	    
             $countries = file_get_contents(COUNTRY_LIST);
             $countries = explode("\n", $countries);
 	    $body = str_replace(array('\n',"\n","\t",'\t')," ",$body);
@@ -279,6 +287,21 @@ EOF;
 
             return $categories;
         }
-}
 
-?>
+	/**
+	 *
+	 * @param <type> $tags
+	 */
+	private function categorizeTags( $tags ) {
+	    $categories = array();
+	    $taglist = unserialize( file_get_contents('taglist.phps') );
+
+	    foreach ( $tags as $tag ) {
+		$categories[] = $taglist[$tag];
+	    }
+
+	    return $categories;
+	}
+
+
+}
