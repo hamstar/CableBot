@@ -4,7 +4,7 @@
  * Copies cables from LeakFeed to a mediawiki database
  * @author Robert McLeod
  * @since 2009
- * @version 0.5
+ * @version 0.5.2
  */
 
 class CableBot {
@@ -189,6 +189,8 @@ class CableBot {
 
 		// Make the wikicode
 		$wikiCode = <<<EOF
+{{Languages|{$cable->identifier}}}
+
 {{Infobox cable
 | title_orig       = {$cable->identifier}
 | date             = {$cable->date_sent} 
