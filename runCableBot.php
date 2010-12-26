@@ -11,6 +11,10 @@ if ( isset($_GET['id']) ) {
     $bot->setId( $_GET['id'] );
 }
 
+if ( isset($_GET['test']) ) {
+    $bot->setTest( true );
+}
+
 $bot->addNewCables();
 
 echo '<pre>',nl2br(file_get_contents(DEBUG_LOG_FILE)),'</pre>';

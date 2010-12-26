@@ -9,6 +9,7 @@
 class CableBot {
 
         private $id = false;
+	private $testOnly = false;
     
 	function __construct() {
 		$this->c = new Curl();
@@ -21,6 +22,10 @@ class CableBot {
         public function setId( $id ) {
             $this->id = $id;
         }
+
+	public function setTest( $b ) {
+	    $this->testOnly = $b;
+	}
 
 	/**
 	 * Logs into the wiki
@@ -160,8 +165,8 @@ class CableBot {
 | title_orig       = {$cable->identifier}
 | date             = {$cable->date_sent} 
 | release_date     = {$cable->released} 
-| media_type       = {$cable->classification} 
-| country          = {$cable->office}
+| media_type       = [[{$cable->classification} ]]
+| country          = [[{$cable->office}]]
 | author           = 
 | subject          = {$cable->subject}  
 }}
@@ -203,7 +208,7 @@ EOF;
 		Logger::log("revision check: ".print_r( $apiJson, true ) );
 
 		if ( !isset($apiJson->query->pages->$pageId->missing) ) {
-		    throw new Exception("Page exists!");
+		    throw new Exception("$id exists in the wiki!");
 		}
 
                 // Setup the edit params
@@ -214,12 +219,17 @@ EOF;
 		$edit['bot'] = "true";
 		$edit['section'] = 0;
 		$edit['createonly'] = "true";
-		$edit['token'] = urlencode( $apiJson->query->pages->$pageId->edittoken );
+		$edit['token'] = $apiJson->query->pages->$pageId->edittoken;
 		$edit['starttimestamp'] = $apiJson->query->pages->$pageId->starttimestamp;
 		$edit['format'] = 'json';
 		Logger::log("wiki edit params: ".print_r($edit, true));
 		$c = $this->c;
 		$c->headers['Content-Type'] = "application/x-www-form-urlencoded";
+		
+		if ( $this->testOnly ) {
+		    Logger::log("Testing mode on: didn't save $id to wiki");
+		    return false;
+		}
 		
 		$editResult = $c->post( WIKI_API, $edit )->body;
 		$editResult = json_decode( $editResult );
@@ -297,7 +307,7 @@ EOF;
 	    $taglist = unserialize( file_get_contents('taglist.phps') );
 
 	    foreach ( $tags as $tag ) {
-		$categories[] = $taglist[$tag];
+		$categories[] = trim($taglist[$tag]);
 	    }
 
 	    return $categories;
