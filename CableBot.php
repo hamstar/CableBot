@@ -4,14 +4,18 @@
  * Copies cables from LeakFeed to a mediawiki database
  * @author Robert McLeod
  * @since 2009
+ * @version 0.5
  */
 
 class CableBot {
 
         private $id = false;
 	private $testOnly = false;
+	private $addExternalLinks = false;
+	private $cablesToCreate = array();
     
 	function __construct() {
+		Logger::log('CableBot initialized');
 		$this->c = new Curl();
 	}
 
@@ -21,17 +25,30 @@ class CableBot {
 	 */
         public function setId( $id ) {
             $this->id = $id;
+	    $this->cablesToCreate[] = $id;
         }
 
+	/**
+	 * When true does not save cable to the wiki
+	 * @param boolean $b true to not save to the wiki
+	 */
 	public function setTest( $b ) {
 	    $this->testOnly = $b;
+	}
+
+	/**
+	 * Sets whether to add an external links section
+	 * @param boolean $b true to add links section
+	 */
+	public function setAddExternalLinks( $b ) {
+	    $this->addExternalLinks = $b;
 	}
 
 	/**
 	 * Logs into the wiki
 	 */
 	private function login() {
-                Logger::log("Trying to login");
+                Logger::log("Logging in");
 
                 $details = array(
 			'action' => 'login',
@@ -43,14 +60,14 @@ class CableBot {
 		$loginResult = $this->c->post( WIKI_API, $details )->body;
 		
 		$loginResult = json_decode( $loginResult );
-		Logger::log("Login result: ". print_r( $loginResult, true ) );
+		//Logger::log("Login result: ". print_r( $loginResult, true ) );
 
                 if ( $loginResult->login->result == "NeedToken" ) {
                     Logger::log("Sending token {$loginResult->login->token}");
                     $details['lgtoken'] = $loginResult->login->token;
                     $loginResult = $this->c->post( WIKI_API, $details )->body;
 		    $loginResult = json_decode( $loginResult );
-		    Logger::log("token login result: ".print_r( $loginResult, true ));
+		    //Logger::log("token login result: ".print_r( $loginResult, true ));
                     if ( $loginResult->login->result != "Success" ) {
                         throw new Exception("Failed to authenticate");
                     }
@@ -61,40 +78,50 @@ class CableBot {
 	}
 
 	/**
+	 * Checks if the given cable ids have been created in the wiki by
+	 * returning an array of the cable ids that don't exist
+	 * @param array $ids cable ids to check if are in the wiki
+	 * @return array array of ids that don't exist
+	 */
+	private function checkIfArticleExists( $ids ) {
+		$idsToCreate = array();
+
+		$chunks = array_chunk($ids, 20);
+		foreach ( $chunks as $chunk ) {
+
+		    $idsToCheck = implode('|',$chunk);
+
+		    Logger::log("Checking if cablewiki has these cables");
+		    $apiJson = $this->c->get(WIKI_API . "?action=query&titles=$idsToCheck&indexpageids&format=json")->body;
+
+		    $apiResult = json_decode( $apiJson );
+		    //Logger::log("cablewiki result: ".print_r( $apiResult, true ));
+
+		    for ( $id=-1; $id > -21; $id-- ) {
+			    if ( !isset( $apiResult->query->pages->$id->missing ) ) continue;
+			    $idsToCreate[] = $apiResult->query->pages->$id->title;
+		    }
+		}
+
+		return $idsToCreate;
+	}
+
+	/**
 	 * Searches for the latest cables, checks if the cable has been added
 	 * to the wiki already, if not returns the id in an array
-	 * @return array of cable ids that need adding
 	 */
-	private function getCablesToAdd() {
+	private function getLatestCables() {
 
                 Logger::log("Getting latest cables");
 		
 		$json = $this->c->get( FEED_LATEST_CABLES )->body;
 		
 		$cables = json_decode( $json );
-		Logger::log("Raw cables: ".print_r( $cables, true) );
+		//Logger::log("Raw cables: ".print_r( $cables, true) );
 
 		foreach ( $cables as $cable ) {
-			$idsToCheck[] = $cable->identifier;
+			$this->cablesToCreate[] = $cable->identifier;
 		}
-		
-		$idsToCheck = implode('|',$idsToCheck);
-
-                Logger::log("Checking if cablewiki has these cables");
-		$apiJson = $this->c->get(WIKI_API . "?action=query&titles=$idsToCheck&indexpageids&format=json")->body;
-		
-		$apiResult = json_decode( $apiJson );
-		Logger::log("cablewiki result: ".print_r( $apiResult, true ));
-
-		foreach ( $apiResult->pageids as $id ) {
-			if ( $id > 0 ) {
-				$idsToCreate[] = $id;
-			}
-		}
-
-                Logger::log(count($idsToCreate)." cables to create");
-
-		return $idsToCreate;
 		
 	}
 
@@ -109,7 +136,7 @@ class CableBot {
 
 		$cable = $this->c->get( FEED_SINGLE_CABLE . $id .'.json' )->body;
 		$cable = json_decode( $cable );
-		Logger::log("raw cable: ".print_r( $cable, true ) );
+		//Logger::log("raw cable: ".print_r( $cable, true ) );
 		return $cable;
 	
 	}
@@ -158,14 +185,15 @@ class CableBot {
 		// Make some modifications
 		$cable->header = str_replace( '\n', "\n", $cable->header );
 		$cable->body = str_replace( array('\n',"¶"), "\n", $cable->body );
-		
+		$cable->encoded_subject = urlencode($cable->subject);
+
 		// Make the wikicode
 		$wikiCode = <<<EOF
 {{Infobox cable
 | title_orig       = {$cable->identifier}
 | date             = {$cable->date_sent} 
 | release_date     = {$cable->released} 
-| media_type       = [[{$cable->classification} ]]
+| media_type       = [[{$cable->classification}]]
 | country          = [[{$cable->office}]]
 | author           = 
 | subject          = {$cable->subject}  
@@ -180,14 +208,25 @@ class CableBot {
 {$cable->body}
 
 
+
 EOF;
-		
+
+		// Add external links section if wanted
+		if ( $this->addExternalLinkSections ) {
+		    $wikiCode .= "==External Links==
+		    * [http://www.google.co.nz/search?q={$cable->identifier} Google search for identifier]
+		    * [http://www.google.co.nz/search?q={$cable->encoded_subject} Google search for subject]
+		    * [http://twitter.com/#search?q={$cable->identifier} Twitter search for identifier]
+		    * [http://api.leakfeed.com/v1/cable/{$cable->identifier}.xml XML version of cable from LeakFeed]\n\n";
+		}
+
 		// Add the categories to the code
 		$categories = array_unique($categories);
 		foreach ( $categories as $cat ) {
+			if ( empty( $cat ) ) continue;
 			$wikiCode .= "[[Category:$cat]]\n";
 		}
-		Logger::log("raw wikicode: $wikiCode");
+		//Logger::log("raw wikicode: $wikiCode");
 		return $wikiCode;
 		
 	}
@@ -205,7 +244,7 @@ EOF;
 
 		$apiJson = $this->c->get(WIKI_API . "?action=query&prop=info|revisions&intoken=edit&titles=$id&format=json")->body;
 		$apiJson = json_decode( $apiJson );
-		Logger::log("revision check: ".print_r( $apiJson, true ) );
+		//Logger::log("revision check: ".print_r( $apiJson, true ) );
 
 		if ( !isset($apiJson->query->pages->$pageId->missing) ) {
 		    throw new Exception("$id exists in the wiki!");
@@ -222,7 +261,9 @@ EOF;
 		$edit['token'] = $apiJson->query->pages->$pageId->edittoken;
 		$edit['starttimestamp'] = $apiJson->query->pages->$pageId->starttimestamp;
 		$edit['format'] = 'json';
-		Logger::log("wiki edit params: ".print_r($edit, true));
+
+		//Logger::log("wiki edit params: ".print_r($edit, true));
+
 		$c = $this->c;
 		$c->headers['Content-Type'] = "application/x-www-form-urlencoded";
 		
@@ -233,7 +274,7 @@ EOF;
 		
 		$editResult = $c->post( WIKI_API, $edit )->body;
 		$editResult = json_decode( $editResult );
-		Logger::log("wiki edit result: ".print_r( $editResult, true ));
+		//Logger::log("wiki edit result: ".print_r( $editResult, true ));
 		
 		if ( $editResult->edit->result != "Success" ) {
 			throw new Exception( "Failed to save cable $id" );
@@ -247,17 +288,21 @@ EOF;
          * Oversees the scraping and saving processes and
          * gives a public interface for calling.
          */
-	public function addNewCables() {
-                Logger::log("Starting process");
-		$this->login();
-
-                if ( $this->id ) {
-                    $idsToCreate[] = $this->id;
-                } else {
-                    $idsToCreate = $this->getCables();
-                }
+	private function addCables() {
+                $this->login();
 		
-		foreach ( $idsToCreate as $id ) {
+		Logger::log(count($this->cablesToCreate)." cables given");
+
+		$this->cablesToCreate = $this->checkIfArticleExists($this->cablesToCreate);
+
+                Logger::log(count($this->cablesToCreate)." cables to create");
+
+		if ( empty( $this->cablesToCreate ) ) {
+		    Logger::log("No cables to process - exiting");
+		    return;
+		}
+
+		foreach ( $this->cablesToCreate as $id ) {
 
                         try {
                             $cable = $this->getSingleCable( $id );
@@ -268,12 +313,35 @@ EOF;
                         }
 		
 		}
+
+		Logger::log("Finished adding cables");
 		
 	}
 
-	public function addOneCable( $id ) {
+	/**
+	 * Finds the latest cables and adds them to the wiki
+	 */
+	public function addLatestCables() {
+	    $this->getLatestCables();
+	    $this->addCables();
+	}
+
+	/**
+	 * Adds a single cable to the wiki
+	 * @param string $id the cable reference id
+	 */
+	public function addSingleCable( $id ) {
 	    $this->setId( $id );
-	    $this->addNewCables();
+	    $this->addCables();
+	}
+
+	/**
+	 * Add cables from the array
+	 * @param array $array Array of cable ids
+	 */
+	public function addCablesFromArray( $array ) {
+	    $this->cablesToCreate = $array;
+	    $this->addCables();
 	}
 
 	/**
@@ -286,6 +354,8 @@ EOF;
 	    
             $countries = file_get_contents(COUNTRY_LIST);
             $countries = explode("\n", $countries);
+
+	    // strip out newlines and tabs
 	    $body = str_replace(array('\n',"\n","\t",'\t')," ",$body);
 
             foreach ( $countries as $country ) {
@@ -299,12 +369,14 @@ EOF;
         }
 
 	/**
-	 *
-	 * @param <type> $tags
+	 * Uses the list of tags to assign categories based on cable tags into
+	 * the wiki
+	 * @param array $tags array of tags in the cable
+	 * @return array of categories
 	 */
 	private function categorizeTags( $tags ) {
 	    $categories = array();
-	    $taglist = unserialize( file_get_contents('taglist.phps') );
+	    $taglist = unserialize( file_get_contents( TAGLIST ) );
 
 	    foreach ( $tags as $tag ) {
 		$categories[] = trim($taglist[$tag]);
