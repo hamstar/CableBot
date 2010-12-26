@@ -148,8 +148,8 @@ class CableBot {
 	 * @return string Grammar'd classification
 	 */
 	private function normalClassification( $classification ) {
-		$search = array(  'CONFIDENTIAL',     'SECRET//NOFORN',       'SECRET',   'CONFIDENTIAL//NOFORN',     'UNCLASSIFIED',  'UNCLASSIFIED//FOR OFFICIAL USE ONLY');
-		$replace = array( 'Confidential',         'Secret No Foreigners',   'Secret',     'Confidential No Foreigners',   'Unclassified',     'Unclassified For Official Use Only');
+		$search = array(  'SECRET//NOFORN',        'SECRET',     'CONFIDENTIAL//NOFORN',       'CONFIDENTIAL',  'UNCLASSIFIED//FOR OFFICIAL USE ONLY',   'UNCLASSIFIED');
+		$replace = array( 'Secret No Foreigners',  'Secret',     'Confidential No Foreigners', 'Confidential',  'Unclassified For Official Use Only',    'Unclassified');
 		return str_replace( $search, $replace, $classification );
 	}
 	
