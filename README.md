@@ -11,9 +11,9 @@ It checks if the cable is already in the mediawiki database before creation. It 
 
 First you will need to configure it.  Currently only 3 options need to be filled out:
 
- define('WIKI_USERNAME','BotName'); // your bots username
- define('WIKI_PASSWORD','secret'); // your bots password
- define('WIKI_API','http://example.com/api.php'); // url to wiki api
+    define('WIKI_USERNAME','BotName'); // your bots username
+    define('WIKI_PASSWORD','secret'); // your bots password
+    define('WIKI_API','http://example.com/api.php'); // url to wiki api
 
 And thats done.
 
@@ -23,19 +23,19 @@ If you look at runCableBot.php it pretty much shows you how to do this.
 
 First you need to make sure to include all the requires:
 
- include 'config.php'; // make sure you put your details in here
- include 'CableBot.php';
- include 'curl.php';
- include 'Logger.php';
+    include 'config.php'; // make sure you put your details in here
+    include 'CableBot.php';
+    include 'curl.php';
+    include 'Logger.php';
 
 Initialize the bot:
 
- $bot = new CableBot;
+    $bot = new CableBot;
 
 Set these configuration modifiers if need be:
 
- $bot->setTest( true ); // will do everything but write to the wiki
- $bot->setAddExternalLinks( true ); // will add external links section
+    $bot->setTest( true ); // will do everything but write to the wiki
+    $bot->setAddExternalLinks( true ); // will add external links section
 
 External links section looks like this:
     ==External Links==
@@ -45,23 +45,23 @@ External links section looks like this:
     * [http://api.leakfeed.com/v1/cable/{$cable->identifier}.xml XML version of cable from LeakFeed]
 
 Then you can instruct the bot to add one cable:
- $bot->addSingleCable( '10KUWAIT161' );
+    $bot->addSingleCable( '10KUWAIT161' );
 
 Some cables from an array:
 
- $cables = array(
-    '10MUSCAT71',
-    '10STATE10900',
-    '10BERLIN153'
- );
+    $cables = array(
+	'10MUSCAT71',
+	'10STATE10900',
+	'10BERLIN153'
+    );
 
- $bot->addCablesFromArray( $cables );
+    $bot->addCablesFromArray( $cables );
 
 Or just to grab the latest cables from leakfeed.
 
- $bot->addLatestCables();
+    $bot->addLatestCables();
 
-Its as easy as that.  Check log.txt for log output.
+Its as easy as that.  Check log-YYYY-MM-DD-HHMM-SS.txt for log output.
 
 # Requires #
 * Sean Hubers awesome [curl library](https://github.com/shuber/curl)
