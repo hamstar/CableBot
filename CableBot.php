@@ -4,7 +4,7 @@
  * Copies cables from LeakFeed to a mediawiki database
  * @author Robert McLeod
  * @since 2009
- * @version 0.5.2
+ * @version 0.5.3
  */
 
 class CableBot {
@@ -17,6 +17,7 @@ class CableBot {
 	function __construct() {
 		Logger::log('CableBot initialized');
 		$this->c = new Curl();
+		$this->c->useragent = "CableBot 0.5.3 / http://cablewiki.net/index.php?title=User:CableBot";
 	}
 
 	/**
@@ -292,7 +293,15 @@ EOF;
          */
 	private function addCables() {
                 $this->login();
-		
+
+		// Normalize cable ids
+		foreach ( $this->cablesToCreate as $id ) {
+		    $id = trim($id);
+		    if ( empty( $id ) ) {
+			unset( $id );
+		    }
+		}
+
 		Logger::log(count($this->cablesToCreate)." cables given");
 
 		$this->cablesToCreate = $this->checkIfArticleExists($this->cablesToCreate);

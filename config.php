@@ -9,4 +9,6 @@ define('FEED_SINGLE_CABLE','http://api.leakfeed.com/v1/cable/');
 
 define('COUNTRY_LIST','countries.txt');
 define('TAGLIST','taglist.phps');
-define('DEBUG_LOG_FILE','log.txt');
+
+$logname = 'log-'.date('Y-m-d-Hm-s').'.txt';
+define('DEBUG_LOG_FILE',$logname);
