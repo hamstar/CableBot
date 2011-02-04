@@ -5,7 +5,7 @@
  * @author Robert McLeod
  * @since Febuary 2011
  * @copyright 2011 Robert McLeod
- * @version 0.2
+ * @version 0.2.1
  */
 class SaveCable {
 
@@ -30,6 +30,8 @@ class SaveCable {
                     Logger::log("Analysis for {$cable['identifier']} exists");
                     if ( $this->overwrite ) {
                         Logger::log("Overwriting {$cable['identifier']} Analysis");
+                    } else {
+                        throw new Exception("Cannot overwrite Analysis for {$cable['identifier']}");
                     }
                 }
 
@@ -58,6 +60,8 @@ class SaveCable {
                     Logger::log("Cable for {$cable['identifier']} exists");
                     if ( $this->overwrite ) {
                         Logger::log("Overwriting {$cable['identifier']} cable");
+                    } else {
+                        throw new Exception("Cannot overwrite Cable for {$cable['identifier']}");
                     }
                 }
 		
