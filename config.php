@@ -12,3 +12,5 @@ define('TAGLIST','taglist.phps');
 
 $logname = 'log-'.date('Y-m-d-Hm-s').'.txt';
 define('DEBUG_LOG_FILE',$logname);
+
+define('OVERWRITE', true);
