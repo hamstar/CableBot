@@ -19,52 +19,13 @@ And thats done.
 
 # How do I run it
 
-If you look at runCableBot.php it pretty much shows you how to do this.
-
-First you need to make sure to include all the requires:
-
-    include 'config.php'; // make sure you put your details in here
-    include 'CableBot.php';
-    include 'curl.php';
-    include 'Logger.php';
-
-Initialize the bot:
-
-    $bot = new CableBot;
-
-Set these configuration modifiers if need be:
-
-    $bot->setTest( true ); // will do everything but write to the wiki
-    $bot->setAddExternalLinks( true ); // will add external links section
-
-External links section looks like this:
-    ==External Links==
-    * [http://www.google.co.nz/search?q={$cable->identifier} Google search for identifier]
-    * [http://www.google.co.nz/search?q={$cable->encoded_subject} Google search for subject]
-    * [http://twitter.com/#search?q={$cable->identifier} Twitter search for identifier]
-    * [http://api.leakfeed.com/v1/cable/{$cable->identifier}.xml XML version of cable from LeakFeed]
-
-Then you can instruct the bot to add one cable:
-    $bot->addSingleCable( '10KUWAIT161' );
-
-Some cables from an array:
-
-    $cables = array(
-	'10MUSCAT71',
-	'10STATE10900',
-	'10BERLIN153'
-    );
-
-    $bot->addCablesFromArray( $cables );
-
-Or just to grab the latest cables from leakfeed.
-
-    $bot->addLatestCables();
+Please check runCableBot.php it pretty much shows you how to do this.  Will update readme soon.
 
 Its as easy as that.  Check log-YYYY-MM-DD-HHMM-SS.txt for log output.
 
 # Requires #
 * Sean Hubers awesome [curl library](https://github.com/shuber/curl)
+* My own [Wikimate](https://github.com/hamstar/wikimate) mediawiki bot framework
 * List of countries (included)
 * Serialized list of cable tag/name pairs (included)
 
