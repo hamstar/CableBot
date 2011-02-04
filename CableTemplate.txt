@@ -1,0 +1,15 @@
+{{Languages|Cable:{identifier}}}
+
+{{Head Toggle Box|headtext= <pre>
+{header}</pre>
+
+<pre>{bodyheader}</pre>
+}}
+
+
+__TOC__
+
+
+<translate>
+{content}
+</translate>
