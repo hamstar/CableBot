@@ -1,7 +1,5 @@
 {{CreateArticle}}
 
-{{Languages}}
-
 {{Semantic Infobox
 | Created         = {date_sent}
 | Released        = {released}
@@ -38,4 +36,4 @@
 
 {{Cable Toggle Box}}
 
-[[Category:Translation]]
+[[Category:Analysis]]
