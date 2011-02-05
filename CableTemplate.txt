@@ -1,5 +1,3 @@
-{{Languages|Cable:{identifier}}}
-
 {{Head Toggle Box|headtext= <pre>
 {header}</pre>
 
