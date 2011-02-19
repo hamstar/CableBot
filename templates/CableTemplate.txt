@@ -1,0 +1,13 @@
+{{Head Toggle Box|headtext= <pre>
+{header}</pre>
+
+<pre>{bodyheader}</pre>
+}}
+
+
+__TOC__
+
+==Content==
+<translate>
+{content}
+</translate>
