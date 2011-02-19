@@ -1,5 +1,7 @@
 {{CreateArticle}}
 
+{{Interface}}
+
 =Analysis=
 
 {{Semantic Infobox
@@ -24,9 +26,6 @@
 
 ==Impact==
 {{Template:Empty impact}}
-
-==Tags==
-{{Template:Empty tags}}
 
 ==Media Articles==
 {{Template:Empty Media Articles}}
