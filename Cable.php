@@ -159,7 +159,7 @@ class Cable implements ArrayAccess {
      * @param string $header The header of the cable
      * @return string The header of the cable
      */
-    public static function parseHead( $header ) {
+    public static function parseHeader( $header ) {
         if ( $header == self::PARTIAL_TEXT ) {
             return str_replace( 'cable. ', "cable.\n", $header );
         }
