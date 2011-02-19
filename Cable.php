@@ -7,7 +7,7 @@
  * @author Robert McLeod
  * @since Febuary 2011
  * @copyright 2011 Robert McLeod
- * @version 0.4.5
+ * @version 0.4.6
  */
 class Cable implements ArrayAccess {
 
@@ -266,14 +266,13 @@ class Cable implements ArrayAccess {
     public static function parseAuthor( $body ) {
 
 	    $content = trim( $body );
-	    $author = substr( $body, strrpos( $body, "\n")+1 );
-	    $author = trim( $author );
+	    $line = substr( $body, strrpos( $body, "\n") );
+	    $line = trim( $line );
 
-	    if ( preg_match( "@[.^\w](\w+)$@", $author, $m ) ) {
-		    return ucfirst($m[1]);
-	    }
+        $words = preg_split( '@\W@', $line );
+        $author = $words[count($words)-1];
 
-	    return '';
+	    return ucfirst( $author );
 
     }
 
