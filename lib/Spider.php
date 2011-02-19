@@ -2,21 +2,25 @@
 
 /**
  * Gets cables from LeakFeed and returns them in a Cable object
+ * or array of cable ids
  * @author Robert McLeod
  * @since 2010
- * @version 0.6
+ * @version 0.7
  */
 
-class CableBot {
+class CableSpider {
     
 	function __construct() {
             $this->c = new Curl();
-            $this->c->useragent = "CableBot 0.6 / http://cablewiki.net/index.php?title=User:CableBot";
+            $this->c->useragent = "CableSpider 0.7 / http://cablewiki.net/index.php?title=User:CableBot";
 	}
 
 	/**
-	 * Gets the latest 50 cables from LeakFeed and returns them as an array of Cable objects
-	 * @return array of Cables
+	 * Gets the latest 50 cables from LeakFeed and returns an array of id's
+	 * Would return the cables themselves however leakfeed doesn't parse the
+	 * tags unless its on a single cable
+	 *
+	 * @return array of cable ids
 	 */
 	public function getLatestCables() {
 		
@@ -24,11 +28,13 @@ class CableBot {
 
             $json_cables = json_decode( $json );
 
+            $ids = array();
+
             foreach ( $json_cables as $cable ) {
-                $cables[] = new Cable( json_encode( $cable ) );
+                $ids[] = $cable->identifier;
             }
 
-            return $cables;
+            return $ids;
 
 	}
 
@@ -39,7 +45,7 @@ class CableBot {
 	 */
 	public function getSingleCable( $id ) {
 
-            $json = $this->c->get( FEED_SINGLE_CABLE . $id .'.json' )->body;
+            $json = $this->c->get( FEED_SINGLE_CABLE . $id . '.' . FEED_FORMAT )->body;
 
             return new Cable( $json );
 	
