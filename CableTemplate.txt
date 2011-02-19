@@ -7,7 +7,7 @@
 
 __TOC__
 
-
+==Content==
 <translate>
 {content}
 </translate>
