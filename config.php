@@ -1,16 +1,24 @@
 <?php
 
-define('WIKI_USERNAME','BotName');
-define('WIKI_PASSWORD','secret');
-define('WIKI_API','http://example.com/api.php');
+define('OVERWRITE', true );
 
-define('FEED_LATEST_CABLES','http://api.leakfeed.com/v1/cables/latest.json');
-define('FEED_SINGLE_CABLE','http://api.leakfeed.com/v1/cable/');
+// Wikimate config
+define('WIKIMATE_USERNAME', 'BotName');
+define('WIKIMATE_PASSWORD', 'secret');
+define('WIKIMATE_API', 'http://example.com/api.php');
+define('WIKIMATE_OVERWRITE', OVERWRITE );
 
-define('COUNTRY_LIST','countries.txt');
-define('TAGLIST','taglist.phps');
+// Feed config
+define('FEED_FORMAT', 'json' );
+define('FEED_LATEST_CABLES', 'http://api.leakfeed.com/v1/cables/latest.' . FEED_FORMAT);
+define('FEED_SINGLE_CABLE', 'http://api.leakfeed.com/v1/cable/');
 
-$logname = 'log-'.date('Y-m-d-Hm-s').'.txt';
-define('DEBUG_LOG_FILE',$logname);
+// File locations
+define('COUNTRY_LIST', './resources/countries.txt');
+define('TAGLIST', './resources/taglist.phps');
+define('CABLE_TEMPLATE', file_get_contents('./templates/CableTemplate.txt') );
+define('ANALYSIS_TEMPLATE', file_get_contents('./templates/AnalysisTemplate.txt') );
 
-define('OVERWRITE', true);
+// Logging
+define('DEBUG_LOGGING', true );
+define('DEBUG_LOG_FILE', 'log-'.date('Y-m-d-Hm-s').'.txt');
