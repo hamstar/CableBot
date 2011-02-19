@@ -7,7 +7,7 @@
  * @author Robert McLeod
  * @since Febuary 2011
  * @copyright 2011 Robert McLeod
- * @version 0.4.4
+ * @version 0.4.5
  */
 class Cable implements ArrayAccess {
 
@@ -37,11 +37,11 @@ class Cable implements ArrayAccess {
 	    'origin' => $cable->office,
 	    'from' => $cable->office,
 	    'office' => $cable->office,
-	    'header' => $cable->header,
-	    'head' => $cable->header,
 	    'tags' =>  $cable->tags,
-            'subject' => $cable->subject,
+     'subject' => $cable->subject,
 	    /** Stuff that needs parsing **/
+	    'header' => self::parseHeader($cable->header),
+	    'head' => self::parseHeader($cable->header),
 	    'body' => self::parseBodyContent( $cable->body ),
 	    'content' => self::parseBodyContent( $cable->body ),
 	    'bodyheader' => self::parseBodyHeader( $cable->body ),
@@ -151,6 +151,21 @@ class Cable implements ArrayAccess {
      *
      *
      */
+
+    /**
+     * Returns a nicer formatted string if it is a
+     * partial cable otherwise returns the header.
+     *
+     * @param string $header The header of the cable
+     * @return string The header of the cable
+     */
+    public static function parseHead( $header ) {
+        if ( $header == self::PARTIAL_TEXT ) {
+            return str_replace( 'cable. ', "cable.\n", $header );
+        }
+        
+        return $header;
+    }
 
     /**
      * Takes the capitalized classified string and turns it into a normalized
