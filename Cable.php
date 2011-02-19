@@ -7,7 +7,7 @@
  * @author Robert McLeod
  * @since Febuary 2011
  * @copyright 2011 Robert McLeod
- * @version 0.4.3
+ * @version 0.4.4
  */
 class Cable implements ArrayAccess {
 
@@ -333,32 +333,23 @@ class Cable implements ArrayAccess {
 
     public static function parseBodyHeader( $body ) {
 
-	$lines = explode( "\n", $body );
+        list( $bodyHeader ) = explode( "¶", $body );
 
-	foreach ( $lines as $line ) {
-	    $bodyHeaderLines[] = $line;
-	    if ( stristr( $line, "classified by" ) ) break;
-	}
-
-	unset( $lines );
-
-	return implode("\n", $bodyHeaderLines );
+        return $bodyHeader;
 
     }
 
     public static function parseBodyContent( $body ) {
 
-	$lines = explode( "\n", $body );
-
-	foreach ( $lines as $k => $line ) {
-	    if ( stristr( $line, "classified by" ) ) {
-		unset( $lines[$k] );
-		break;
-	    }
-	    unset( $lines[$k] );
-	}
-
-	return implode("\n", $lines );
+        $paras = explode( "¶", $body );
+        
+        unset( $paras[0] );
+        
+        foreach ( &$paras as &$para ) {
+            $para = trim( $para );
+        }
+        
+        return implode("\n<hr/>\n", $paras );
 
     }
 
