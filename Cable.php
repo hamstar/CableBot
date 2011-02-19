@@ -345,7 +345,7 @@ class Cable implements ArrayAccess {
         
         unset( $paras[0] );
         
-        foreach ( &$paras as &$para ) {
+        foreach ( $paras as &$para ) {
             $para = trim( $para );
         }
         
