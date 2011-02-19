@@ -1,5 +1,5 @@
 # What is this? #
-**Currently broken in the middle of a restructure sorry!**
+**Currently broken in the middle of a restructure sorry!  Use [this tree](https://github.com/hamstar/CableBot/tree/c4855e0222bd9465789484e73a222b9c6b5dd849) instead**
 
 This is a wikibot that will copy cables from LeakFeed.com into a mediawiki database.
 
