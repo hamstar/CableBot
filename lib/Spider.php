@@ -5,14 +5,14 @@
  * or array of cable ids
  * @author Robert McLeod
  * @since 2010
- * @version 0.7
+ * @version 0.7.1
  */
 
 class CableSpider {
     
 	function __construct() {
             $this->c = new Curl();
-            $this->c->useragent = "CableSpider 0.7 / http://cablewiki.net/index.php?title=User:CableBot";
+            $this->c->useragent = "CableSpider 0.7.1 / http://cablewiki.net/index.php?title=User:CableBot";
 	}
 
 	/**
@@ -43,13 +43,23 @@ class CableSpider {
 	 * @param int $id
 	 * @return Cable object
 	 */
-	public function getSingleCable( $id ) {
+	public function getCable( $id ) {
 
             $json = $this->c->get( FEED_SINGLE_CABLE . $id . '.' . FEED_FORMAT )->body;
 
             return new Cable( $json );
 	
 	}
+
+    /**
+     * Returns the json text of the cable
+     *
+     * @param string $id the cable id
+     * @return string json string of the cable
+     */
+    public function getJson( $id ) {
+        return $this->c->get( FEED_SINGLE_CABLE . $id . '.' . FEED_FORMAT )->body;
+    }
 
 
 }
