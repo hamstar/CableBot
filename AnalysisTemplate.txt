@@ -1,5 +1,7 @@
 {{CreateArticle}}
 
+=Analysis=
+
 {{Semantic Infobox
 | Created         = {date_sent}
 | Released        = {released}
@@ -14,8 +16,6 @@
 | Author          = {author}
 }}
 
-
-=Analysis=
 ==Summary==
 {{Template:Empty summary}}
 
