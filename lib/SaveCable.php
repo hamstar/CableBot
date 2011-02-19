@@ -5,9 +5,9 @@
  * @author Robert McLeod
  * @since Febuary 2011
  * @copyright 2011 Robert McLeod
- * @version 0.2.1
+ * @version 0.3
  */
-class SaveCable {
+class CableSaver {
 
 	private $wikimate = null;
         private $overwrite = OVERWRITE;
