@@ -7,7 +7,7 @@
  * @author Robert McLeod
  * @since Febuary 2011
  * @copyright 2011 Robert McLeod
- * @version 0.4.6
+ * @version 0.5
  */
 class Cable implements ArrayAccess {
 
@@ -17,6 +17,12 @@ class Cable implements ArrayAccess {
     private $attributes = array();
 
     function __construct( $json ) {
+
+        if ( !$json = json_decode( $json ) ) {
+            $spider = new CableSpider;
+            $json = $spider->getJson( $input );
+            unset($spider);
+        }
 
 	$this->originalJson = $json;
 	$cable = json_decode( $json );
