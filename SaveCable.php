@@ -10,7 +10,7 @@
 class SaveCable {
 
 	private $wikimate = null;
-        private $overwrite = OVERWITE;
+        private $overwrite = OVERWRITE;
 	
 	function __construct() {
 	
