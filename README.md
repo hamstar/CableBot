@@ -1,4 +1,6 @@
 # What is this? #
+**Currently broken in the middle of a restructure sorry!**
+
 This is a wikibot that will copy cables from LeakFeed.com into a mediawiki database.
 
 It creates a template infobox cable at the top of the article.
